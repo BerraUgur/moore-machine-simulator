@@ -1,167 +1,173 @@
 import os
-sonluDurumlar=[]
-girdiDizisi=["a","b"]
-olasiCikti=[0,1]
 
-def yeniGiris(elemanSayisi):
-    sonluDurumlar.clear()
-    girisCikis= [[0 for x in range(4)] for y in range(elemanSayisi)]
-    for i in range(elemanSayisi): #sonlu durumlar kümesi oluşturuldu
-        ek="q"+str(i)
-        sonluDurumlar.append(ek)
-    for i in range(elemanSayisi):
-        index=0
-        girisCikis[i][index]=sonluDurumlar[i]
-        for j in girdiDizisi:
-            clear()
-            while True: #Durumlar arası geçiş alındı
-                if i!=0:
-                    tablo(girisCikis,girdiDizisi,i)
-                kontrol=0
-                print("\n",sonluDurumlar[i],"Durum Geçişi")
-                say=1
-                for k in sonluDurumlar:
-                    print(say,"- ",sonluDurumlar[i],">>",k)
-                    say+=1
+# Global variables for states, input symbols, and output symbols
+states = []
+input_symbols = ["a", "b"]
+output_symbols = [0, 1]
+
+def clear_screen():
+    """Clear the terminal screen for better UX."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def create_moore_machine(num_states):
+    """
+    Interactively create the Moore machine's transition and output tables.
+    Returns a list of lists representing the machine.
+    """
+    states.clear()
+    # Each row: [state, next_state_a, next_state_b, output]
+    transition_output_table = [[0 for _ in range(4)] for _ in range(num_states)]
+    for i in range(num_states):
+        state_name = f"q{i}"
+        states.append(state_name)
+    for i in range(num_states):
+        col_index = 0
+        transition_output_table[i][col_index] = states[i]
+        # Get transitions for each input symbol
+        for symbol in input_symbols:
+            clear_screen()
+            while True:
+                if i != 0:
+                    print_transition_table(transition_output_table, input_symbols, i)
+                print(f"\nTransition for state {states[i]}")
+                for idx, s in enumerate(states, start=1):
+                    print(f"{idx} - {states[i]} >> {s}")
                 try:
-                    giris=int(input("\n"+j+" girişindeki geçiş: "))
-                    for l in range(1,say):
-                        if giris==l:
-                            kontrol=1
-                            break
-                    if kontrol==1:
-                        index+=1
-                        girisCikis[i][index]=sonluDurumlar[giris-1]
+                    transition = int(input(f"\nNext state for input '{symbol}': "))
+                    if 1 <= transition <= len(states):
+                        col_index += 1
+                        transition_output_table[i][col_index] = states[transition - 1]
                         break
                     else:
-                        input("Yanlış değer girdiniz\n")
-                        clear()    
+                        input("Invalid value. Press Enter to retry.")
+                        clear_screen()
                 except ValueError:
-                    input("Hatalı değer girdiniz\n")
-                    clear()
+                    input("Invalid input. Press Enter to retry.")
+                    clear_screen()
                     continue
-        index+=1
-        kontrol=0
-        while True: #Olası çıktı verileri alındı
+        # Get output for the state
+        col_index += 1
+        while True:
             try:
-                clear()
-                if i!=0:
-                    tablo(girisCikis,girdiDizisi,i)
-                cikis=int(input(sonluDurumlar[i]+" durumu için cikis değeri : "))
-                for j in olasiCikti:
-                    if cikis==j:
-                        kontrol=1
-                if kontrol==1:
-                    girisCikis[i][index]=cikis
+                clear_screen()
+                if i != 0:
+                    print_transition_table(transition_output_table, input_symbols, i)
+                output_value = int(input(f"Output value for state {states[i]}: "))
+                if output_value in output_symbols:
+                    transition_output_table[i][col_index] = output_value
                     break
                 else:
-                    print(olasiCikti," seçeneklerinden birini giriniz")
+                    print(f"Please enter one of {output_symbols}")
             except ValueError:
                 continue
-        tablo(girisCikis,girdiDizisi,i+1)
-    return girisCikis
+        print_transition_table(transition_output_table, input_symbols, i + 1)
+    return transition_output_table
 
-def tablo(giris, girdi,elemanSayisi):
-    clear()
+def print_transition_table(table, input_symbols, num_states):
+    """
+    Print the transition and output table in a formatted way.
+    """
+    clear_screen()
     print("_________________________________________________________________________")
-    print("|                  Transition Table",end="                  ")
-    print("|   Output Table    |")
+    print("|                  Transition Table                  |   Output Table    |")
     print("|____________________________________________________|___________________|")
-    print("| Old State |",end="    ")
-    for i in girdi:
-        print("After input ",i,end="    ")
+    print("| Old State |", end="    ")
+    for symbol in input_symbols:
+        print(f"After input {symbol}", end="    ")
     print("| Character printed |")
     print("|-----------|----------------------------------------|-------------------|")
-    for i in range(elemanSayisi):  #Sonlu durumlar kümesinin eleman sayısı kadar satır oluşturuldu ve veriler tabloda gösterildi
-        print("|",end="    ")
+    for i in range(num_states):
+        print("|", end="    ")
         for j in range(4):
-            if j==0:
-                print(giris[i][j],end="     |          ")
-            elif j==1:
-                print(giris[i][j],end="                ")
-            elif j==2:
-                print(giris[i][j],end="          ")
+            if j == 0:
+                print(table[i][j], end="     |          ")
+            elif j == 1:
+                print(table[i][j], end="                ")
+            elif j == 2:
+                print(table[i][j], end="          ")
             else:
-                print("|        ",giris[i][j],"        |")
+                print(f"|        {table[i][j]}        |")
     print("|___________|________________________________________|___________________|")
 
-def moore(inputString,girisCikis,elemansayisi): #bilgilerini tablo halinde ekrana göstermesi için oluşturuldu
-    inputCount=len(inputString)
-    aktifDurum="q0"
-    durum=[]
-    output=[]
-    durum.append(aktifDurum)
-    output.append(0)
-    for i in range(inputCount): #alınan string'e göre makineden kontrol ve düzenleme işlemi
-        kontrol=0
-        for j in range(len(girdiDizisi)):
-            if inputString[i]==girdiDizisi[j]:
-                ind=j+1
-                for k in range(elemanSayisi):
-                    if girisCikis[k][0]==aktifDurum:
-                        aktifDurum=girisCikis[k][ind]
-                        durum.append(aktifDurum)
-                        for l in range(elemanSayisi):
-                            if girisCikis[l][0]==aktifDurum:
-                                output.append(girisCikis[l][3])
+def simulate_moore_machine(input_string, transition_output_table, num_states):
+    """
+    Simulate the Moore machine for a given input string and print the state and output trace.
+    """
+    input_length = len(input_string)
+    current_state = "q0"
+    state_trace = [current_state]
+    output_trace = [0]
+    # For each input character, find the next state and output
+    for i in range(input_length):
+        found = False
+        for j, symbol in enumerate(input_symbols):
+            if input_string[i] == symbol:
+                next_state_index = j + 1
+                for k in range(num_states):
+                    if transition_output_table[k][0] == current_state:
+                        current_state = transition_output_table[k][next_state_index]
+                        state_trace.append(current_state)
+                        # Find output for the new state
+                        for l in range(num_states):
+                            if transition_output_table[l][0] == current_state:
+                                output_trace.append(transition_output_table[l][3])
                                 break
-                        kontrol=1
+                        found = True
                         break
-            if kontrol==1:
+            if found:
                 break
-    print("____________________",end="") #tablolama işleminde girilen stringde girdi dizisinde bulunmayan karakterler yok sayıldı
-    for i in range(inputCount):
-        for j in girdiDizisi:
-            if inputString[i]==j:
-                print("___",end="")
-    print("\n|Input String",end="  |    ")
-    for i in range(inputCount):
-        for j in girdiDizisi:
-            if inputString[i]==j:
-                print(inputString[i],end="  ")
-    print("|\n|State",end="         |")
-    for i in durum:
-        print(i,end=" ")
-    print(" |\n|Output",end="        | ")
-    for i in output:
-        print(i,end="  ")
-    print("|\n|______________",end="|____")
-    for i in range(inputCount):
-        for j in girdiDizisi:
-            if inputString[i]==j:
-                print("___",end="")
+    # Print the simulation result in a tabular format
+    print("____________________", end="")
+    for i in range(input_length):
+        if input_string[i] in input_symbols:
+            print("___", end="")
+    print("\n|Input String  |    ", end="")
+    for i in range(input_length):
+        if input_string[i] in input_symbols:
+            print(input_string[i], end="  ")
+    print("|\n|State         |", end=" ")
+    for state in state_trace:
+        print(state, end=" ")
+    print("|\n|Output        | ", end="")
+    for out in output_trace:
+        print(out, end="  ")
+    print("|\n|______________|____", end="")
+    for i in range(input_length):
+        if input_string[i] in input_symbols:
+            print("___", end="")
     print("|")
 
-def clear():
-    if os.name == 'nt':
-        _ = os.system('cls')
-    else:
-        _ = os.system('clear')
+def main():
+    """
+    Main loop for the Moore machine simulator CLI.
+    """
+    clear_screen()
+    while True:
+        clear_screen()
+        print("1. Moore Machine Simulator")
+        print("0. Exit")
+        try:
+            choice = int(input("\nSelect an option: "))
+            if choice == 0:
+                clear_screen()
+                input("Program terminated. Press Enter to exit.")
+                break
+            elif choice == 1:
+                clear_screen()
+                num_states = int(input("Enter the number of states: "))
+                transition_table = create_moore_machine(num_states)
+                input_str = input("\nInput string: ")
+                simulate_moore_machine(input_str, transition_table, num_states)
+                input("\n\nPress Enter to return to main menu.")
+            else:
+                clear_screen()
+                print("Invalid selection.")
+                input("\n\nPress Enter to return to main menu.")
+        except ValueError:
+            clear_screen()
+            print("Invalid selection.")
+            input("\n\nPress Enter to return to main menu.")
+            continue
 
-clear()
-while True:                         
-    clear()
-    print("1. Moore Makinesi")
-    print("0. Çıkış")
-    try:
-        secim= int(input("\nMenüden seçim yapın: "))
-        if secim==0:
-            clear()
-            input("Program sonlandırıldı")
-            break
-        elif secim==1:
-            clear()
-            elemanSayisi=int(input("Sonlu durumlar kümesinin eleman sayısını giriniz: "))
-            giris=yeniGiris(elemanSayisi)
-            inputStr=input("\nGiriş stringi: ")
-            moore(inputStr,giris,elemanSayisi)
-            input("\n\nAna menüye dönmek için Enter'a basınız")
-        else:
-            clear()
-            print("Hatalı Seçim yaptınız")
-            input("\n\nAna menüye dönmek için Enter'a basınız")
-    except ValueError:
-        clear()
-        print("Hatalı Seçim yaptınız")
-        input("\n\nAna menüye dönmek için Enter'a basınız")
-        continue
+if __name__ == "__main__":
+    main()
