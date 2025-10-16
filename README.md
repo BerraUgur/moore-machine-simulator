@@ -1,5 +1,5 @@
 # Moore Machine Simulator
-Moore Machine Simulator is a Python application for modeling, simulating, and visualizing Moore finite state machines. The project allows users to define states, input and output alphabets, transition and output tables, and to simulate the machine's behavior interactively or via text files.
+Moore Machine Simulator is a Python application for modeling, simulating, and visualizing Moore finite state machines. The project allows users to define states, input and output alphabets, transition and output tables, and to simulate the machine's behavior interactively.
 
 ## Features
 - Interactive definition of states, input symbols, and output symbols
@@ -35,8 +35,6 @@ Q: {q0, q1, q2, ..., qN}
 Σ = {a, b}
 Γ = {0, 1}
 ```
-
-Transition and output tables should be tab-separated, with headers in the first row and columns representing states and transitions.
 
 ## Example
 Transition Table:
